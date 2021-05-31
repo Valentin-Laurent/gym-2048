@@ -132,8 +132,12 @@ class Game2048Env(gym.Env):
         self.score = 0
 
         logging.debug("Adding tiles")
-        self.add_tile()
-        self.add_tile()
+        if self.high_start:
+            self.add_high_tile()
+            self.add_high_tile()
+        else:
+            self.add_tile()
+            self.add_tile()
 
         return stack(self.Matrix)
 
@@ -187,28 +191,29 @@ class Game2048Env(gym.Env):
 
     # Implement 2048 game
     def add_tile(self):
-        """Add a tile, probably a 2 but maybe a 4 if high start is False.
-            if high start is true, then same but with 2, 4, 512 or 1024"""
-        if self.high_start :
-            possible_tiles = np.array([2, 4, 512, 1024])
-            tile_probabilities = np.array([0.7, 0.1, 0.1, 0.1])
-            val = self.np_random.choice(possible_tiles, 1, p=tile_probabilities)[0]
-            empties = self.empties()
-            assert empties.shape[0]
-            empty_idx = self.np_random.choice(empties.shape[0])
-            empty = empties[empty_idx]
-            logging.debug("Adding %s at %s", val, (empty[0], empty[1]))
-            self.set(empty[0], empty[1], val)
-        else :
-            possible_tiles = np.array([2, 4])
-            tile_probabilities = np.array([0.9, 0.1])
-            val = self.np_random.choice(possible_tiles, 1, p=tile_probabilities)[0]
-            empties = self.empties()
-            assert empties.shape[0]
-            empty_idx = self.np_random.choice(empties.shape[0])
-            empty = empties[empty_idx]
-            logging.debug("Adding %s at %s", val, (empty[0], empty[1]))
-            self.set(empty[0], empty[1], val)
+        """Add a tile, probably a 2 but maybe a 4 if high start is False."""
+        possible_tiles = np.array([2, 4])
+        tile_probabilities = np.array([0.9, 0.1])
+        val = self.np_random.choice(possible_tiles, 1, p=tile_probabilities)[0]
+        empties = self.empties()
+        assert empties.shape[0]
+        empty_idx = self.np_random.choice(empties.shape[0])
+        empty = empties[empty_idx]
+        logging.debug("Adding %s at %s", val, (empty[0], empty[1]))
+        self.set(empty[0], empty[1], val)
+        
+    
+    def add_high_tile(self):
+        """Add a tile, probably a 2 but maybe a 4, 512 or 1024 if high start is False."""
+        possible_tiles = np.array([2, 4, 512, 1024])
+        tile_probabilities = np.array([0.7, 0.1, 0.1, 0.1])
+        val = self.np_random.choice(possible_tiles, 1, p=tile_probabilities)[0]
+        empties = self.empties()
+        assert empties.shape[0]
+        empty_idx = self.np_random.choice(empties.shape[0])
+        empty = empties[empty_idx]
+        logging.debug("Adding %s at %s", val, (empty[0], empty[1]))
+        self.set(empty[0], empty[1], val)
 
     def get(self, x, y):
         """Return the value of one square."""
